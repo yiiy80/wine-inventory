@@ -1,0 +1,7 @@
+# directories
+logs/
+.claude/
+__pycache__/
+venv/
+.env
+*.pyc

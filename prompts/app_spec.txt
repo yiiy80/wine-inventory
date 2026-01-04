@@ -1,0 +1,684 @@
+<project_specification>
+  <project_name>红酒库存管理系统</project_name>
+
+  <overview>
+    一个专业的红酒库存管理Web应用，专为红酒厂商和红酒庄主设计。系统提供完整的红酒库存追踪、出入库管理、库存预警、数据可视化分析以及多用户权限管理功能，帮助用户高效管理红酒资产，优化库存决策。
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>React with Vite</framework>
+      <language>TypeScript</language>
+      <styling>Tailwind CSS</styling>
+      <state_management>React hooks and context</state_management>
+      <routing>React Router for navigation</routing>
+      <charts>Recharts for data visualization</charts>
+      <port>5173</port>
+    </frontend>
+    <backend>
+      <runtime>Python with FastAPI</runtime>
+      <database>SQLite with SQLAlchemy ORM</database>
+      <authentication>JWT tokens</authentication>
+      <port>8000</port>
+    </backend>
+    <communication>
+      <api>RESTful endpoints</api>
+      <format>JSON</format>
+    </communication>
+  </technology_stack>
+
+  <prerequisites>
+    <environment_setup>
+      - Node.js 18+ installed
+      - Python 3.10+ installed
+      - npm or pnpm package manager
+      - pip package manager
+    </environment_setup>
+  </prerequisites>
+
+  <feature_count>280</feature_count>
+
+  <security_and_access_control>
+    <user_roles>
+      <role name="admin">
+        <permissions>
+          - 完全访问所有功能
+          - 管理用户账户（创建、编辑、删除、禁用）
+          - 查看所有用户的操作日志
+          - 设置系统级参数
+          - 导入导出所有数据
+          - 管理红酒库存
+        </permissions>
+        <protected_routes>
+          - /admin/*（管理员专属）
+          - /users/*（用户管理）
+          - /settings/*（系统设置）
+        </protected_routes>
+      </role>
+      <role name="user">
+        <permissions>
+          - 查看红酒库存列表
+          - 添加、编辑红酒信息
+          - 执行出入库操作
+          - 查看库存预警
+          - 查看仪表盘
+          - 查看自己的操作日志
+          - 导出数据（仅自己可见的）
+        </permissions>
+        <protected_routes>
+          - /dashboard（已认证用户）
+          - /wines/*（红酒管理）
+          - /inventory/*（出入库管理）
+          - /reports/*（报表）
+        </protected_routes>
+      </role>
+    </user_roles>
+    <authentication>
+      <method>email/password with JWT</method>
+      <session_timeout>24 hours</session_timeout>
+      <password_requirements>最少8个字符，包含字母和数字</password_requirements>
+    </authentication>
+    <sensitive_operations>
+      - 删除红酒需要确认对话框
+      - 批量删除需要二次确认
+      - 删除用户需要管理员密码确认
+      - 导出敏感数据需要确认
+    </sensitive_operations>
+  </security_and_access_control>
+
+  <core_features>
+    <authentication>
+      - 用户登录（邮箱/密码）
+      - 用户登出
+      - 用户注册（仅管理员可创建新用户）
+      - 密码重置（通过控制台链接）
+      - JWT令牌刷新
+      - 会话管理
+      - 记住我功能
+    </authentication>
+
+    <wine_management>
+      - 查看红酒库存列表（分页）
+      - 添加新红酒
+      - 编辑红酒信息
+      - 删除红酒（需确认）
+      - 按名称搜索红酒
+      - 按年份筛选
+      - 按产区筛选
+      - 按葡萄品种筛选
+      - 按供应商筛选
+      - 按存放位置筛选
+      - 按价格范围筛选
+      - 按库存状态筛选（正常/低库存/缺货）
+      - 多字段排序
+      - 红酒详情页面
+      - 红酒图片上传（可选）
+      - 批量操作（选择多个红酒）
+    </wine_management>
+
+    <wine_fields>
+      - 名称（必填）
+      - 年份（必填，4位数字）
+      - 产区（必填）
+      - 葡萄品种
+      - 价格（数字，保留两位小数）
+      - 供应商
+      - 存放位置
+      - 当前库存数量（整数）
+      - 低库存阈值（整数）
+      - 备注（多行文本）
+      - 创建时间（自动）
+      - 更新时间（自动）
+    </wine_fields>
+
+    <inventory_management>
+      - 记录入库操作
+      - 记录出库操作
+      - 查看出入库历史记录
+      - 按红酒筛选历史
+      - 按操作类型筛选（入库/出库）
+      - 按日期范围筛选
+      - 按操作人员筛选
+      - 出入库记录详情
+      - 记录操作原因
+      - 自动更新库存数量
+      - 出库数量不能超过当前库存
+      - 批量入库
+    </inventory_management>
+
+    <inventory_alerts>
+      - 实时监控库存水平
+      - 低库存预警列表
+      - 每种红酒独立设置预警阈值
+      - 预警状态可视化标识（红/黄/绿）
+      - 仪表盘预警汇总
+      - 预警筛选和排序
+    </inventory_alerts>
+
+    <dashboard>
+      - 库存总览卡片（总数量、总价值、品类数）
+      - 低库存预警数量
+      - 近期出入库趋势图表（折线图）
+      - 库存分布图（按产区/按品种）
+      - 本月出入库统计
+      - 快速操作入口
+      - 时间范围选择（7天/30天/90天/自定义）
+      - 数据实时刷新
+    </dashboard>
+
+    <data_export_import>
+      - 导出完整库存清单（CSV/Excel）
+      - 导出出入库记录报告
+      - 导出筛选后的数据
+      - 导入库存数据（CSV格式）
+      - 导入时数据验证
+      - 导入错误提示
+      - 导出进度提示
+    </data_export_import>
+
+    <operation_logs>
+      - 记录所有用户操作
+      - 操作类型（登录、登出、增删改查、导入导出）
+      - 操作时间戳
+      - 操作用户
+      - 操作详情（变更前后对比）
+      - 日志列表查看
+      - 按用户筛选
+      - 按操作类型筛选
+      - 按时间范围筛选
+      - 日志详情页
+    </operation_logs>
+
+    <user_management>
+      - 用户列表（管理员）
+      - 创建新用户（管理员）
+      - 编辑用户信息
+      - 禁用/启用用户
+      - 删除用户（需确认）
+      - 修改用户角色
+      - 修改自己的密码
+      - 个人资料编辑
+    </user_management>
+
+    <user_interface>
+      - 响应式布局（桌面、平板、手机）
+      - 深色/浅色主题切换
+      - 中文界面
+      - 侧边栏导航（可折叠）
+      - 面包屑导航
+      - 加载状态指示
+      - 骨架屏加载
+      - 错误处理和用户反馈
+      - Toast通知
+      - 确认对话框
+      - 空状态处理
+      - 分页组件
+      - 表格排序
+      - 下拉筛选
+      - 日期选择器
+      - 模态框表单
+    </user_interface>
+  </core_features>
+
+  <database_schema>
+    <tables>
+      <users>
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+        - email (TEXT UNIQUE NOT NULL)
+        - password_hash (TEXT NOT NULL)
+        - name (TEXT NOT NULL)
+        - role (TEXT NOT NULL DEFAULT 'user')
+        - is_active (BOOLEAN DEFAULT TRUE)
+        - created_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+        - updated_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+      </users>
+
+      <wines>
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+        - name (TEXT NOT NULL)
+        - vintage_year (INTEGER NOT NULL)
+        - region (TEXT NOT NULL)
+        - grape_variety (TEXT)
+        - price (REAL)
+        - supplier (TEXT)
+        - storage_location (TEXT)
+        - current_stock (INTEGER DEFAULT 0)
+        - low_stock_threshold (INTEGER DEFAULT 10)
+        - notes (TEXT)
+        - image_url (TEXT)
+        - created_by (INTEGER REFERENCES users(id))
+        - created_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+        - updated_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+      </wines>
+
+      <inventory_transactions>
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+        - wine_id (INTEGER REFERENCES wines(id) ON DELETE CASCADE)
+        - transaction_type (TEXT NOT NULL) -- 'in' or 'out'
+        - quantity (INTEGER NOT NULL)
+        - reason (TEXT)
+        - performed_by (INTEGER REFERENCES users(id))
+        - created_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+      </inventory_transactions>
+
+      <operation_logs>
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT)
+        - user_id (INTEGER REFERENCES users(id))
+        - action_type (TEXT NOT NULL)
+        - entity_type (TEXT)
+        - entity_id (INTEGER)
+        - details (TEXT) -- JSON格式存储详细信息
+        - ip_address (TEXT)
+        - created_at (DATETIME DEFAULT CURRENT_TIMESTAMP)
+      </operation_logs>
+    </tables>
+  </database_schema>
+
+  <api_endpoints_summary>
+    <authentication>
+      - POST /api/auth/login
+      - POST /api/auth/logout
+      - POST /api/auth/refresh
+      - POST /api/auth/forgot-password
+      - POST /api/auth/reset-password
+      - GET /api/auth/me
+      - PUT /api/auth/profile
+      - PUT /api/auth/password
+    </authentication>
+
+    <wines>
+      - GET /api/wines (list with pagination, search, filters, sort)
+      - POST /api/wines (create)
+      - GET /api/wines/:id (get single)
+      - PUT /api/wines/:id (update)
+      - DELETE /api/wines/:id (delete)
+      - GET /api/wines/low-stock (get low stock wines)
+      - GET /api/wines/regions (get distinct regions)
+      - GET /api/wines/varieties (get distinct grape varieties)
+      - GET /api/wines/suppliers (get distinct suppliers)
+      - GET /api/wines/locations (get distinct storage locations)
+    </wines>
+
+    <inventory>
+      - GET /api/inventory (list transactions with filters)
+      - POST /api/inventory/in (record stock in)
+      - POST /api/inventory/out (record stock out)
+      - GET /api/inventory/:id (get single transaction)
+      - GET /api/inventory/wine/:wineId (get transactions for wine)
+    </inventory>
+
+    <dashboard>
+      - GET /api/dashboard/summary (overview stats)
+      - GET /api/dashboard/trends (stock trends over time)
+      - GET /api/dashboard/distribution (stock by region/variety)
+      - GET /api/dashboard/alerts (low stock alerts count)
+    </dashboard>
+
+    <users>
+      - GET /api/users (list users - admin only)
+      - POST /api/users (create user - admin only)
+      - GET /api/users/:id (get single user)
+      - PUT /api/users/:id (update user)
+      - DELETE /api/users/:id (delete user - admin only)
+      - PUT /api/users/:id/status (toggle active status - admin only)
+    </users>
+
+    <logs>
+      - GET /api/logs (list operation logs with filters)
+      - GET /api/logs/:id (get single log entry)
+    </logs>
+
+    <export_import>
+      - GET /api/export/wines (export wines to CSV/Excel)
+      - GET /api/export/transactions (export transactions)
+      - POST /api/import/wines (import wines from CSV)
+    </export_import>
+  </api_endpoints_summary>
+
+  <ui_layout>
+    <main_structure>
+      - 顶部导航栏：Logo、搜索框、通知图标、主题切换、用户菜单
+      - 左侧边栏：导航菜单（可折叠）
+      - 主内容区：页面内容
+      - 响应式：移动端侧边栏变为抽屉式
+    </main_structure>
+
+    <sidebar>
+      - Logo/品牌标识
+      - 仪表盘入口
+      - 红酒管理
+      - 出入库管理
+      - 库存预警
+      - 数据报表
+      - 操作日志
+      - 用户管理（管理员可见）
+      - 系统设置（管理员可见）
+      - 用户信息/登出（底部）
+    </sidebar>
+
+    <main_pages>
+      - 登录页面（居中表单卡片）
+      - 仪表盘（卡片网格 + 图表）
+      - 红酒列表（筛选栏 + 表格 + 分页）
+      - 红酒详情（信息卡片 + 操作历史）
+      - 出入库记录（筛选 + 表格）
+      - 预警列表（状态标识 + 表格）
+      - 操作日志（筛选 + 表格）
+      - 用户管理（表格 + 操作按钮）
+      - 个人设置（表单）
+    </main_pages>
+
+    <modals_overlays>
+      - 添加/编辑红酒表单模态框
+      - 入库/出库操作模态框
+      - 删除确认对话框
+      - 用户编辑模态框
+      - 导出选项模态框
+      - 导入结果模态框
+    </modals_overlays>
+  </ui_layout>
+
+  <design_system>
+    <color_palette>
+      <!-- 红酒主题色彩 -->
+      - Primary: #722F37 (Burgundy - 勃艮第红)
+      - Primary Light: #8B3A42
+      - Primary Dark: #5A252C
+      - Secondary: #C9A227 (Gold - 香槟金)
+      - Accent: #1E4D2B (Forest Green - 酒瓶绿)
+      - Background Light: #FAF7F2 (Cream - 米白)
+      - Background Dark: #1A1412 (Dark Wine)
+      - Surface Light: #FFFFFF
+      - Surface Dark: #2D2420
+      - Text Primary Light: #2C1810
+      - Text Primary Dark: #F5EDE6
+      - Text Secondary Light: #6B5B4F
+      - Text Secondary Dark: #A89585
+      - Border Light: #E8DFD5
+      - Border Dark: #3D3530
+      - Success: #2D7D46
+      - Warning: #D4A520
+      - Error: #B91C1C
+      - Info: #0369A1
+    </color_palette>
+
+    <typography>
+      - Font Display: Playfair Display, Georgia, serif (标题)
+      - Font Body: Source Sans 3, -apple-system, BlinkMacSystemFont, sans-serif
+      - Font Mono: JetBrains Mono, Consolas, monospace
+      - 中文字体回退: "PingFang SC", "Microsoft YaHei", sans-serif
+      - Headings: font-semibold
+      - Body: font-normal, leading-relaxed
+    </typography>
+
+    <components>
+      <buttons>
+        - Primary: 勃艮第红背景，白色文字，圆角
+        - Secondary: 边框样式，hover时填充
+        - Ghost: 透明背景，hover时显示背景
+        - Danger: 红色系，用于删除操作
+        - Icon buttons: 方形带hover效果
+      </buttons>
+
+      <inputs>
+        - 圆角边框，focus时显示主色环
+        - 清晰的placeholder文本
+        - 错误状态显示红色边框和提示
+        - 禁用状态灰化
+        - 标签在上方
+      </inputs>
+
+      <cards>
+        - 轻微阴影或边框
+        - 圆角 (8px)
+        - hover时轻微上浮效果
+        - 内边距统一
+      </cards>
+
+      <tables>
+        - 斑马纹行背景
+        - 表头固定
+        - hover行高亮
+        - 操作列右对齐
+        - 响应式：小屏幕时卡片化
+      </tables>
+    </components>
+
+    <animations>
+      - 过渡效果 (150-300ms ease)
+      - 页面切换淡入淡出
+      - 模态框滑入/缩放
+      - 加载骨架屏脉动
+      - Toast从顶部滑入
+      - 按钮hover缩放(1.02)
+      - 卡片hover上浮效果
+    </animations>
+
+    <icons>
+      - 使用 Lucide React 图标库
+      - 一致的图标大小 (16px, 20px, 24px)
+      - 图标配合文字使用时保持对齐
+    </icons>
+  </design_system>
+
+  <key_interactions>
+    <user_flow_login>
+      1. 用户访问应用，未登录时重定向到登录页
+      2. 输入邮箱和密码
+      3. 点击登录按钮
+      4. 验证成功后跳转到仪表盘
+      5. 验证失败显示错误提示
+    </user_flow_login>
+
+    <user_flow_add_wine>
+      1. 在红酒列表页点击"添加红酒"按钮
+      2. 模态框弹出，显示表单
+      3. 填写红酒信息（名称、年份、产区等）
+      4. 点击保存
+      5. 表单验证通过后保存到数据库
+      6. 关闭模态框，列表刷新显示新红酒
+      7. 显示成功Toast通知
+    </user_flow_add_wine>
+
+    <user_flow_stock_out>
+      1. 在红酒详情页或列表页点击"出库"按钮
+      2. 模态框显示当前库存数量
+      3. 输入出库数量和原因
+      4. 系统验证数量不超过当前库存
+      5. 确认后更新库存，记录出库历史
+      6. 如库存降至阈值以下，显示预警
+      7. 显示成功Toast通知
+    </user_flow_stock_out>
+
+    <user_flow_export>
+      1. 在相应列表页点击"导出"按钮
+      2. 选择导出格式（CSV/Excel）
+      3. 选择导出范围（全部/当前筛选）
+      4. 确认后生成文件
+      5. 浏览器自动下载文件
+      6. 显示导出成功提示
+    </user_flow_export>
+  </key_interactions>
+
+  <implementation_steps>
+    <step number="1">
+      <title>项目初始化和数据库设置</title>
+      <tasks>
+        - 初始化Vite + React + TypeScript前端项目
+        - 配置Tailwind CSS
+        - 初始化FastAPI后端项目
+        - 创建SQLite数据库和表结构
+        - 配置CORS中间件
+        - 设置环境变量
+        - 创建基础项目结构
+      </tasks>
+    </step>
+
+    <step number="2">
+      <title>认证系统</title>
+      <tasks>
+        - 实现用户模型和密码哈希
+        - 创建JWT令牌生成和验证
+        - 实现登录API端点
+        - 实现登出API端点
+        - 创建登录页面UI
+        - 实现前端认证状态管理
+        - 添加路由保护
+        - 实现密码重置流程
+      </tasks>
+    </step>
+
+    <step number="3">
+      <title>红酒管理核心功能</title>
+      <tasks>
+        - 创建红酒CRUD API端点
+        - 实现红酒列表页面（表格、分页）
+        - 实现添加红酒表单
+        - 实现编辑红酒功能
+        - 实现删除红酒功能
+        - 添加搜索功能
+        - 添加筛选功能
+        - 添加排序功能
+        - 创建红酒详情页
+      </tasks>
+    </step>
+
+    <step number="4">
+      <title>出入库管理</title>
+      <tasks>
+        - 创建出入库记录API端点
+        - 实现入库操作功能
+        - 实现出库操作功能
+        - 创建出入库历史列表
+        - 添加筛选和搜索
+        - 自动更新库存数量
+        - 添加库存验证（出库不超过库存）
+      </tasks>
+    </step>
+
+    <step number="5">
+      <title>库存预警系统</title>
+      <tasks>
+        - 实现库存水平检查逻辑
+        - 创建预警列表API
+        - 创建预警列表页面
+        - 添加预警状态标识
+        - 在仪表盘显示预警汇总
+        - 每个红酒可设置独立阈值
+      </tasks>
+    </step>
+
+    <step number="6">
+      <title>数据可视化仪表盘</title>
+      <tasks>
+        - 创建仪表盘统计API
+        - 实现库存概览卡片
+        - 添加库存趋势折线图
+        - 添加库存分布图
+        - 实现时间范围选择
+        - 添加数据刷新功能
+        - 快速操作入口
+      </tasks>
+    </step>
+
+    <step number="7">
+      <title>数据导入导出</title>
+      <tasks>
+        - 实现CSV/Excel导出功能
+        - 创建导出API端点
+        - 实现CSV导入功能
+        - 添加导入数据验证
+        - 创建导入结果报告
+        - 添加导出进度指示
+      </tasks>
+    </step>
+
+    <step number="8">
+      <title>操作日志系统</title>
+      <tasks>
+        - 创建日志记录中间件
+        - 实现日志查询API
+        - 创建操作日志列表页
+        - 添加筛选功能
+        - 创建日志详情页
+        - 记录变更前后对比
+      </tasks>
+    </step>
+
+    <step number="9">
+      <title>用户管理（管理员）</title>
+      <tasks>
+        - 创建用户管理API端点
+        - 实现用户列表页面
+        - 添加创建用户功能
+        - 添加编辑用户功能
+        - 实现用户启用/禁用
+        - 实现角色管理
+        - 添加个人资料编辑
+      </tasks>
+    </step>
+
+    <step number="10">
+      <title>UI优化和响应式设计</title>
+      <tasks>
+        - 完善响应式布局
+        - 实现深色/浅色主题
+        - 添加加载状态和骨架屏
+        - 优化动画效果
+        - 添加Toast通知系统
+        - 完善错误处理
+        - 优化移动端体验
+      </tasks>
+    </step>
+
+    <step number="11">
+      <title>测试和优化</title>
+      <tasks>
+        - 测试所有用户流程
+        - 修复边界情况
+        - 性能优化
+        - 确保可访问性
+        - 最终UI打磨
+        - 安全检查
+      </tasks>
+    </step>
+  </implementation_steps>
+
+  <success_criteria>
+    <functionality>
+      - 所有功能按规范工作
+      - 浏览器控制台无错误
+      - 全面的错误处理
+      - 数据正确持久化到数据库
+      - 所有API端点正常响应
+      - 导入导出功能正常
+    </functionality>
+
+    <user_experience>
+      - 直观的导航和工作流
+      - 所有设备尺寸响应式显示
+      - 页面加载时间 < 2秒
+      - 所有操作有清晰反馈
+      - 可访问性（键盘导航、ARIA标签）
+      - 中文界面清晰准确
+    </user_experience>
+
+    <technical_quality>
+      - 代码结构清晰可维护
+      - 一致的编码风格
+      - 适当的关注点分离
+      - 安全的认证实现
+      - 输入验证和消毒
+      - API响应格式统一
+    </technical_quality>
+
+    <design_polish>
+      - 一致的视觉设计
+      - 流畅的动画效果
+      - 专业的外观
+      - 深色和浅色主题完整实现
+      - 无布局问题或溢出
+      - 符合红酒行业的优雅风格
+    </design_polish>
+  </success_criteria>
+</project_specification>
