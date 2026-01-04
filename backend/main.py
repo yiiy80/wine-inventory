@@ -16,11 +16,19 @@ from seed import seed_admin_user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create tables on startup
-    Base.metadata.create_all(bind=engine)
-    # Seed admin user
-    seed_admin_user()
-    yield
+    try:
+        # Create tables on startup
+        Base.metadata.create_all(bind=engine)
+        print("✓ Database tables created")
+        # Seed admin user
+        seed_admin_user()
+        print("✓ Admin user seeded")
+        yield
+    except Exception as e:
+        print(f"✗ Lifespan error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 app = FastAPI(
     title="红酒库存管理系统 API",

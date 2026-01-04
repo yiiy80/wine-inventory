@@ -1,24 +1,27 @@
+import React from "react";
 
-import { Users } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-
-export default function UsersPage() {
-  const { theme } = useTheme();
-  const textPrimary = theme === 'dark' ? '#FFFFFF' : '#111827';
-  const textSecondary = theme === 'dark' ? '#9CA3AF' : '#6B7280';
-
+const UsersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-display font-semibold" style={{ color: textPrimary }}>
+        <h1 className="text-2xl font-display font-bold text-text-primary-light dark:text-text-primary-dark">
           用户管理
         </h1>
-        <p className="mt-1" style={{ color: textSecondary }}>管理系统用户</p>
+        <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+          管理系统用户账户
+        </p>
       </div>
-      <div className="card text-center py-12">
-        <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p style={{ color: textSecondary }}>用户管理功能开发中...</p>
+      <div className="card">
+        <div className="card-content">
+          <div className="text-center py-12">
+            <p className="text-text-secondary-light dark:text-text-secondary-dark">
+              用户管理页面开发中...
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default UsersPage;

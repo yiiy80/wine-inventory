@@ -1,292 +1,329 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Wine, Package, DollarSign, AlertCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
 } from "recharts";
-import api from "../services/api";
-import { useTheme } from "../contexts/ThemeContext";
+import {
+  Wine,
+  Package,
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
+  Calendar,
+  RefreshCw,
+} from "lucide-react";
+import { dashboardAPI } from "../services/api";
+import { DashboardSummary, StockTrend, StockDistribution } from "../types";
+import LoadingSpinner from "../components/LoadingSpinner";
+import toast from "react-hot-toast";
 
-interface DashboardStats {
-  total_wines: number;
-  total_stock: number;
-  total_value: number;
-  low_stock_count: number;
-}
-
-interface ChartData {
-  name: string;
-  value: number;
-  [key: string]: string | number;
-}
-
-export default function DashboardPage() {
-  const { theme } = useTheme();
-  const [stats, setStats] = useState<DashboardStats>({
-    total_wines: 0,
-    total_stock: 0,
-    total_value: 0,
-    low_stock_count: 0,
-  });
+const DashboardPage: React.FC = () => {
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [trends, setTrends] = useState<StockTrend[]>([]);
+  const [distribution, setDistribution] = useState<StockDistribution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [trendData, setTrendData] = useState<ChartData[]>([]);
-  const [regionData, setRegionData] = useState<ChartData[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Chart colors - using CSS custom properties that work with dark mode
-  const chartTextColor = "rgb(107 114 128 / var(--tw-text-opacity))"; // Will be overridden by CSS
-  const chartGridColor = "rgb(229 231 235 / var(--tw-border-opacity))"; // Will be overridden by CSS
-  const chartAxisColor = "rgb(107 114 128 / var(--tw-text-opacity))"; // Will be overridden by CSS
+  const loadDashboardData = async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      else setRefreshing(true);
+
+      const [summaryData, trendsData, distributionData] = await Promise.all([
+        dashboardAPI.getSummary(),
+        dashboardAPI.getTrends({ days: 30 }),
+        dashboardAPI.getDistribution(),
+      ]);
+
+      setSummary(summaryData);
+      setTrends(trendsData);
+      setDistribution(distributionData);
+    } catch (error: any) {
+      toast.error("加载仪表盘数据失败");
+      console.error("Dashboard data loading error:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [statsRes, trendsRes, distributionRes] = await Promise.all([
-        api.get("/dashboard/summary"),
-        api.get("/dashboard/trends"),
-        api.get("/dashboard/distribution"),
-      ]);
-
-      setStats(statsRes.data);
-      setTrendData(trendsRes.data.trends || []);
-      setRegionData(distributionRes.data.by_region || []);
-    } catch (error) {
-      console.error("Failed to load dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = () => {
+    loadDashboardData(false);
   };
-
-  const statCards = [
-    {
-      icon: Wine,
-      label: "红酒品类",
-      value: stats.total_wines,
-      color: "bg-primary",
-      iconColor: "text-primary",
-    },
-    {
-      icon: Package,
-      label: "总库存量",
-      value: stats.total_stock,
-      color: "bg-blue-600",
-      iconColor: "text-blue-600",
-    },
-    {
-      icon: DollarSign,
-      label: "库存总价值",
-      value: `¥${stats.total_value.toLocaleString()}`,
-      color: "bg-green-600",
-      iconColor: "text-green-600",
-    },
-    {
-      icon: AlertCircle,
-      label: "低库存预警",
-      value: stats.low_stock_count,
-      color: "bg-red-600",
-      iconColor: "text-red-600",
-    },
-  ];
-
-  const COLORS = ["#722F37", "#8B3A42", "#C9A227", "#1E4D2B", "#5A252C"];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-96">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
+  // 统计卡片数据
+  const statsCards = [
+    {
+      title: "总红酒数量",
+      value: summary?.total_wines || 0,
+      icon: Wine,
+      color: "text-primary-600",
+      bgColor: "bg-primary-50 dark:bg-primary-900/20",
+    },
+    {
+      title: "总库存数量",
+      value: summary?.total_stock || 0,
+      icon: Package,
+      color: "text-secondary-600",
+      bgColor: "bg-secondary-50 dark:bg-secondary-900/20",
+    },
+    {
+      title: "库存总价值",
+      value: `¥${(summary?.total_value || 0).toLocaleString()}`,
+      icon: DollarSign,
+      color: "text-accent-600",
+      bgColor: "bg-accent-50 dark:bg-accent-900/20",
+    },
+    {
+      title: "低库存预警",
+      value: summary?.low_stock_count || 0,
+      icon: AlertTriangle,
+      color: "text-warning",
+      bgColor: "bg-warning/10",
+    },
+  ];
+
+  // 图表颜色
+  const COLORS = ["#722F37", "#C9A227", "#1E4D2B", "#8B5555", "#A16207"];
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
+    <div className="space-y-4 max-h-screen overflow-y-auto">
+      {/* 页面标题和刷新按钮 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-semibold text-content-primary">
+          <h1 className="text-2xl font-display font-bold text-text-primary-light dark:text-text-primary-dark">
             仪表盘
           </h1>
-          <p className="mt-1 text-content-secondary">库存概览与数据分析</p>
+          <p className="text-text-secondary-light dark:text-text-secondary-dark mt-1">
+            红酒库存管理概览
+          </p>
         </div>
-        <button onClick={loadDashboardData} className="btn-secondary text-sm">
-          刷新数据
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="btn btn-secondary flex items-center space-x-2"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+          />
+          <span>{refreshing ? "刷新中..." : "刷新数据"}</span>
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="card">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm mb-1 text-content-secondary">
-                    {card.label}
-                  </p>
-                  <p className="text-2xl md:text-3xl font-display font-semibold text-content-primary">
-                    {card.value}
-                  </p>
-                </div>
-                <div className={`p-3 ${card.color} rounded-lg`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
+      {/* 统计卡片 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statsCards.map((card, index) => (
+          <div key={index} className="card">
+            <div className="flex items-center p-4">
+              <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                <card.icon className={`h-5 w-5 ${card.color}`} />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                  {card.title}
+                </p>
+                <p className="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">
+                  {card.value}
+                </p>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Trend Chart */}
+      {/* 图表区域 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* 库存趋势图 */}
         <div className="card">
-          <h3 className="text-lg font-display font-semibold mb-6 text-content-primary">
-            库存趋势
-          </h3>
-          {trendData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
-                <XAxis
-                  dataKey="name"
-                  stroke={chartAxisColor}
-                  style={{ fill: chartTextColor }}
-                />
-                <YAxis
-                  stroke={chartAxisColor}
-                  style={{ fill: chartTextColor }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: theme === "dark" ? "#2D2420" : "#fff",
-                    border: `1px solid ${chartGridColor}`,
-                    borderRadius: "8px",
-                    color: theme === "dark" ? "#F3F4F6" : "#111827",
-                  }}
-                />
-                <Legend wrapperStyle={{ color: chartTextColor }} />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#722F37"
-                  strokeWidth={2}
-                  name="库存量"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div
-              className="flex items-center justify-center h-64"
-              style={{ color: chartTextColor }}
-            >
-              暂无数据
+          <div className="card-header py-3">
+            <h3 className="text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
+              库存趋势 (30天)
+            </h3>
+          </div>
+          <div className="card-content py-3">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trends}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border-light dark:stroke-border-dark"
+                  />
+                  <XAxis
+                    dataKey="date"
+                    className="text-text-secondary-light dark:text-text-secondary-dark text-xs"
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis
+                    className="text-text-secondary-light dark:text-text-secondary-dark text-xs"
+                    tick={{ fontSize: 10 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "var(--color-surface-light)",
+                      border: "1px solid var(--color-border-light)",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="stock_in"
+                    stroke="#722F37"
+                    strokeWidth={2}
+                    name="入库"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="stock_out"
+                    stroke="#C9A227"
+                    strokeWidth={2}
+                    name="出库"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Region Distribution */}
+        {/* 库存分布图 */}
         <div className="card">
-          <h3 className="text-lg font-display font-semibold mb-6 text-content-primary">
-            产区分布
-          </h3>
-          {regionData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={regionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(props: any) => {
-                    const name = props.name || "";
-                    const percent = props.percent || 0;
-                    const RADIAN = Math.PI / 180;
-                    const radius = props.outerRadius + 30;
-                    const x =
-                      props.cx + radius * Math.cos(-props.midAngle * RADIAN);
-                    const y =
-                      props.cy + radius * Math.sin(-props.midAngle * RADIAN);
-                    return (
-                      <text
-                        x={x}
-                        y={y}
-                        fill={chartTextColor}
-                        textAnchor={x > props.cx ? "start" : "end"}
-                        dominantBaseline="central"
-                      >
-                        {`${name} ${(percent * 100).toFixed(0)}%`}
-                      </text>
-                    );
-                  }}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {regionData.map((_entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: theme === "dark" ? "#2D2420" : "#fff",
-                    border: `1px solid ${chartGridColor}`,
-                    borderRadius: "8px",
-                    color: theme === "dark" ? "#F3F4F6" : "#111827",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div
-              className="flex items-center justify-center h-64"
-              style={{ color: chartTextColor }}
-            >
-              暂无数据
+          <div className="card-header py-3">
+            <h3 className="text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
+              库存分布 (按产区)
+            </h3>
+          </div>
+          <div className="card-content py-3">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={distribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    outerRadius={70}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {distribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="card">
-        <h3 className="text-lg font-display font-semibold mb-4 text-content-primary">
-          快速操作
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link to="/wines" className="btn-primary text-center">
-            查看红酒列表
-          </Link>
-          <Link to="/inventory" className="btn-secondary text-center">
-            出入库管理
-          </Link>
-          <Link to="/alerts" className="btn-secondary text-center">
-            查看预警
-          </Link>
-          <Link to="/reports" className="btn-secondary text-center">
-            生成报表
-          </Link>
+      {/* 快速操作和系统状态 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* 快速操作 */}
+        <div className="card">
+          <div className="card-header py-3">
+            <h3 className="text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
+              快速操作
+            </h3>
+          </div>
+          <div className="card-content py-3">
+            <div className="grid grid-cols-1 gap-3">
+              <button className="btn btn-primary flex items-center justify-center space-x-2 py-3">
+                <Wine className="h-4 w-4" />
+                <span>添加红酒</span>
+              </button>
+              <button className="btn btn-secondary flex items-center justify-center space-x-2 py-3">
+                <Package className="h-4 w-4" />
+                <span>记录入库</span>
+              </button>
+              <button className="btn btn-ghost flex items-center justify-center space-x-2 py-3">
+                <TrendingUp className="h-4 w-4" />
+                <span>查看报表</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 系统状态 */}
+        <div className="card">
+          <div className="card-header py-3">
+            <h3 className="text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
+              系统状态
+            </h3>
+          </div>
+          <div className="card-content py-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-background-light dark:bg-background-dark rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="h-2 w-2 bg-success rounded-full"></div>
+                  <span className="text-sm text-text-primary-light dark:text-text-primary-dark">
+                    后端服务正常
+                  </span>
+                </div>
+                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                  {new Date().toLocaleTimeString("zh-CN")}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-background-light dark:bg-background-dark rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="h-2 w-2 bg-success rounded-full"></div>
+                  <span className="text-sm text-text-primary-light dark:text-text-primary-dark">
+                    数据库连接正常
+                  </span>
+                </div>
+                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                  {new Date().toLocaleTimeString("zh-CN")}
+                </span>
+              </div>
+
+              {summary && summary.low_stock_count > 0 && (
+                <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <span className="text-sm text-text-primary-light dark:text-text-primary-dark">
+                      {summary.low_stock_count} 种红酒库存不足
+                    </span>
+                  </div>
+                  <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                    需要关注
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default DashboardPage;
