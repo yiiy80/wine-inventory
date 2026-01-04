@@ -137,7 +137,7 @@ const LoginPage: React.FC = () => {
                 <button
                   type="button"
                   className="text-primary-600 hover:text-primary-500 font-medium"
-                  onClick={() => toast.info("密码重置功能即将上线")}
+                  onClick={() => toast("密码重置功能即将上线")}
                   disabled={isLoading}
                 >
                   忘记密码？

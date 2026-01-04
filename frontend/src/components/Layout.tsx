@@ -10,13 +10,11 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
   Moon,
   Sun,
   User,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import toast from "react-hot-toast";
 
 interface LayoutProps {
   children: React.ReactNode;

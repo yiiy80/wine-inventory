@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import WinesPage from "./pages/WinesPage";
 import WineDetailPage from "./pages/WineDetailPage";
+import WineFormPage from "./pages/WineFormPage";
 import InventoryPage from "./pages/InventoryPage";
 import AlertsPage from "./pages/AlertsPage";
 import LogsPage from "./pages/LogsPage";
@@ -76,6 +78,28 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <WinesPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/wines/new"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <WineFormPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/wines/:id/edit"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <WineFormPage />
             </Layout>
           </ProtectedRoute>
         }
@@ -157,11 +181,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-background-light dark:bg-background-dark">
-        <AppRoutes />
-      </div>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <div className="min-h-screen bg-background-light dark:bg-background-dark">
+          <AppRoutes />
+        </div>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

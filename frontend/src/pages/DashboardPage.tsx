@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,7 +17,6 @@ import {
   AlertTriangle,
   TrendingUp,
   DollarSign,
-  Calendar,
   RefreshCw,
 } from "lucide-react";
 import { dashboardAPI } from "../services/api";
@@ -230,7 +227,7 @@ const DashboardPage: React.FC = () => {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {distribution.map((entry, index) => (
+                    {distribution.map((_, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}

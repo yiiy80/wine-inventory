@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import os
+from dotenv import load_dotenv
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -9,10 +11,13 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import User
 
+# Load environment variables
+load_dotenv()
+
 # Security configuration
-SECRET_KEY = "wine-inventory-secret-key-change-in-production-2024"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+SECRET_KEY = os.getenv("SECRET_KEY", "wine-inventory-secret-key-change-in-production-2024")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 security = HTTPBearer()
@@ -58,33 +63,25 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    print(f"[DEBUG] Credentials received: {credentials}")
     if credentials is None:
-        print("[DEBUG] No credentials provided")
         raise credentials_exception
 
     token = credentials.credentials
-    print(f"[DEBUG] Token extracted: {token[:50] if token else 'None'}...")
     payload = decode_token(token)
-    print(f"[DEBUG] Token payload: {payload}")
 
     if payload is None:
-        print("[DEBUG] Payload is None")
         raise credentials_exception
 
     user_id_str = payload.get("sub")
-    print(f"[DEBUG] User ID (string): {user_id_str}")
     if user_id_str is None:
         raise credentials_exception
 
     try:
         user_id = int(user_id_str)
     except (ValueError, TypeError):
-        print(f"[DEBUG] Invalid user ID format: {user_id_str}")
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()
-    print(f"[DEBUG] User found: {user.email if user else 'None'}")
     if user is None:
         raise credentials_exception
 

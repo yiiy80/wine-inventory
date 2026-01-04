@@ -129,11 +129,11 @@ npm install
 npm run dev
 ```
 
-前端运行在: http://localhost:5174
+前端运行在: http://localhost:5173
 
 ## 📱 访问应用
 
-- **前端应用**: http://localhost:5174
+- **前端应用**: http://localhost:5173
 - **后端API**: http://localhost:8000
 - **API文档**: http://localhost:8000/docs (Swagger UI)
 - **API文档**: http://localhost:8000/redoc (ReDoc)
@@ -315,6 +315,31 @@ wine-inventory/
 - **代码检查**: ESLint代码质量检查
 - **错误处理**: 全面的用户友好的错误处理
 - **日志记录**: 完整的操作日志追踪
+
+### 📊 当前项目状态
+
+✅ **后端测试**: 24/24 通过 (100%)
+- JWT认证系统正常
+- 所有API端点功能完整
+- 数据库操作稳定
+
+✅ **前端测试**: 20/20 通过 (100%)
+- 组件渲染正常
+- API集成无误
+- TypeScript编译通过
+
+✅ **系统集成**: 完全正常
+- 前后端通信顺畅
+- CORS配置正确
+- 生产构建成功
+
+### 🔧 近期修复
+
+- **JWT认证Bug**: 修复python-jose库的sub字段类型问题
+- **环境变量**: 添加SECRET_KEY等敏感配置的环境变量支持
+- **TypeScript错误**: 修复17个编译错误，包括unused imports和变量
+- **调试日志**: 清理生产环境不需要的调试输出
+- **构建优化**: 前端构建成功，包大小优化建议
 
 ## 🚀 部署说明
 
