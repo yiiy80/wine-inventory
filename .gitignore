@@ -1,5 +1,6 @@
 # directories
 logs/
+*.log
 .claude/
 __pycache__/
 .env
