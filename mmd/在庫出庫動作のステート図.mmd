@@ -1,0 +1,72 @@
+stateDiagram-v2
+    [*] --> Idle: システム待機
+
+    Idle --> InputForm: 出庫操作開始
+    note right of InputForm : StockTransactionModal表示
+
+    InputForm --> Validating: フォーム送信
+    note right of Validating : 数量・在庫・理由チェック
+
+    Validating --> InputForm: バリデーションエラー
+    note right of InputForm : エラー表示・再入力促し
+
+    Validating --> SendingRequest: バリデーション成功
+    note right of SendingRequest : APIリクエスト送信
+
+    SendingRequest --> ProcessingBackend: HTTPリクエスト受信
+    note right of ProcessingBackend : inventory.py stock_out処理
+
+    ProcessingBackend --> CheckingWine: Wine存在確認
+    note right of CheckingWine : DBクエリ実行
+
+    CheckingWine --> WineNotFound: Wineなし
+    note right of WineNotFound : HTTP 404
+
+    CheckingWine --> CheckingStock: Wineあり
+    note right of CheckingStock : 在庫数量チェック
+
+    CheckingStock --> InsufficientStock: 在庫不足
+    note right of InsufficientStock : HTTP 400
+
+    CheckingStock --> CreatingTransaction: 在庫充足
+    note right of CreatingTransaction : InventoryTransaction作成
+
+    CreatingTransaction --> UpdatingStock: トランザクション作成成功
+    note right of UpdatingStock : Wine.current_stock更新
+
+    UpdatingStock --> CommittingTransaction: 在庫更新成功
+    note right of CommittingTransaction : DBコミット
+
+    CommittingTransaction --> LoggingOperation: コミット成功
+    note right of LoggingOperation : OperationLog作成
+
+    LoggingOperation --> Success: ログ記録成功
+    note right of Success : TransactionResponse返却
+
+    WineNotFound --> ErrorResponse: エラー処理
+    InsufficientStock --> ErrorResponse: エラー処理
+
+    ErrorResponse --> ErrorHandling: APIレイヤーエラー処理
+    note right of ErrorHandling : エラーレスポンス送信
+
+    ErrorHandling --> ErrorDisplay: Frontendエラー受信
+    note right of ErrorDisplay : エラーメッセージ表示
+
+    ErrorDisplay --> InputForm: 再入力促し
+
+    Success --> SuccessResponse: API成功レスポンス
+    note right of SuccessResponse : InventoryTransaction返却
+
+    SuccessResponse --> SuccessDisplay: Frontend成功受信
+    note right of SuccessDisplay : 成功メッセージ表示
+
+    SuccessDisplay --> RefreshingList: 在庫リスト再読み込み
+    note right of RefreshingList : UIデータ更新
+
+    RefreshingList --> Completed: 操作完了
+    note right of Completed : 最終状態
+
+    Completed --> [*]: システム待機へ戻る
+
+    note left of Idle : 初期状態
+    note right of Completed : 終了状態

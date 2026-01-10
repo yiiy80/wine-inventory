@@ -1,0 +1,43 @@
+flowchart TD
+    A[開始: ユーザー出庫操作] --> B{StockTransactionModal<br/>フォームバリデーション}
+    B --> C{数量 > 0?}
+    C -->|No| D[エラー: 数量必須]
+    C -->|Yes| E{出庫数量 ≦ 現在在庫?}
+    E -->|No| F[エラー: 在庫不足]
+    E -->|Yes| G{理由入力済み?}
+    G -->|No| H[エラー: 理由必須]
+    G -->|Yes| I[InventoryPageへデータ送信]
+
+    D --> J[ユーザーにエラー表示]
+    F --> J
+    H --> J
+
+    I --> K[APIリクエスト送信<br/>POST /api/inventory/out]
+
+    K --> L{Backend: Wine存在確認}
+    L -->|Wineなし| M[HTTP 404 エラー]
+    L -->|Wineあり| N{Backend: 在庫数量チェック<br/>current_stock ≧ quantity}
+
+    N -->|在庫不足| O[HTTP 400 エラー<br/>库存不足]
+    N -->|在庫充足| P[InventoryTransaction作成<br/>transaction_type: 'out']
+
+    P --> Q[Wine.current_stock -= quantity<br/>DB更新]
+    Q --> R[トランザクションコミット]
+    R --> S[OperationLog作成<br/>action_type: 'stock_out']
+    S --> T[成功レスポンス返却]
+
+    M --> U[APIレイヤーエラー処理]
+    O --> U
+    U --> V[Frontend: エラー表示]
+
+    T --> W[APIレイヤー: 成功レスポンス]
+    W --> X[InventoryPage: 成功メッセージ]
+    X --> Y[在庫リスト再読み込み]
+    Y --> Z[UI更新完了]
+
+    J --> AA[入力修正待ち]
+    AA --> B
+
+    V --> AA
+
+    Z --> BB[終了]

@@ -408,4 +408,4 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ## LINK
 
 [長時間稼働エージェントのための効果的なハーネス設計](https://log.eurekapu.com/effective-harnesses-for-long-running-agents)
-/
+[Claude Code 設定プロンプト完全ガイド](https://log.eurekapu.com/claude-code-settings-guide)

@@ -1,0 +1,40 @@
+sequenceDiagram
+    participant U as User (ユーザー)
+    participant STM as frontend/StockTransactionModal.tsx
+    participant IP as frontend/InventoryPage.tsx
+    participant API as frontend/api.ts
+    participant INV as backend/routers/inventory.py
+    participant DB as backend/models.py
+    participant LOG as backend/models.py (OperationLog)
+
+    Note over U,LOG: 在庫出庫動作のシーケンス図
+
+    U->>STM: 出庫操作を開始（数量・理由入力）
+    STM->>STM: フォームバリデーション実行
+    STM->>IP: onSubmitコールバック（wineId, type: "out", quantity, reason）
+
+    IP->>API: inventoryAPI.createStockOut(data) 呼び出し
+    API->>INV: POST /api/inventory/out HTTPリクエスト
+
+    INV->>DB: Wine 存在確認クエリ
+    DB-->>INV: Wine レコード返却
+    INV->>INV: 在庫数量チェック (current_stock >= quantity)
+
+    alt 在庫不足
+        INV-->>API: HTTP 400 エラー (库存不足)
+        API-->>IP: エラー例外スロー
+        IP-->>U: エラーメッセージ表示
+    else 在庫充足
+        INV->>DB: InventoryTransaction レコード作成 (transaction_type: "out")
+        INV->>DB: Wine.current_stock -= quantity 更新
+        DB-->>INV: トランザクションコミット
+
+        INV->>LOG: OperationLog レコード作成 (action_type: "stock_out")
+        LOG-->>INV: ログ記録完了
+
+        INV-->>API: TransactionResponse 返却
+        API-->>IP: InventoryTransaction オブジェクト返却
+
+        IP->>IP: 在庫リスト再読み込み
+        IP-->>U: 成功メッセージ表示 + UI更新
+    end
