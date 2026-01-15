@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('LoginPage 单元测试', () => {
   test.beforeEach(async ({ page }) => {
     // 导航到登录页面
-    await page.goto('/login');
+    await page.goto('http://localhost:5173/login');
   });
 
   test('页面标题和基本布局应该正确显示', async ({ page }) => {
@@ -123,6 +123,16 @@ test.describe('LoginPage 单元测试', () => {
   });
 
   test('表单提交时应该显示加载状态', async ({ page }) => {
+    // Mock the login API to prevent actual API call and keep loading state
+    await page.route('**/api/auth/login', async route => {
+      // Delay the response to keep loading state visible for the test
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await route.fulfill({
+        status: 200,
+        json: { access_token: 'fake_token', token_type: 'bearer' }
+      });
+    });
+
     const emailInput = page.locator('input[type="email"]');
     const passwordInput = page.locator('input[type="password"]');
     const loginButton = page.locator('button[type="submit"]');
@@ -134,12 +144,10 @@ test.describe('LoginPage 单元测试', () => {
     // 提交表单（这会触发加载状态）
     await loginButton.click();
 
-    // 检查按钮是否显示加载状态（如果后端响应）
-    // 注意：这个测试可能需要根据实际的后端响应来调整
+    // 检查按钮是否显示加载状态
     const loadingSpinner = page.locator('.animate-spin');
-    if (await loadingSpinner.isVisible()) {
-      await expect(loginButton).toHaveText(/登录中\.\.\./);
-    }
+    await expect(loadingSpinner).toBeVisible();
+    await expect(loginButton).toHaveText(/登录中\.\.\./);
   });
 
   test('表单字段在加载状态下应该被禁用', async ({ page }) => {
