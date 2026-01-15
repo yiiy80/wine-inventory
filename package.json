@@ -1,0 +1,23 @@
+{
+  "name": "wine-inventory",
+  "version": "1.0.0",
+  "description": "一个专业的红酒库存管理Web应用，专为红酒厂商和红酒庄主设计。系统提供完整的红酒库存追踪、出入库管理、库存预警、数据可视化分析以及多用户权限管理功能，帮助用户高效管理红酒资产，优化库存决策。",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yiiy80/wine-inventory.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yiiy80/wine-inventory/issues"
+  },
+  "homepage": "https://github.com/yiiy80/wine-inventory#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.8"
+  }
+}
