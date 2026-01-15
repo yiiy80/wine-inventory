@@ -47,6 +47,13 @@ test.describe('LoginPage 单元测试', () => {
   });
 
   test('密码显示/隐藏切换功能应该正常工作', async ({ page }) => {
+    // 开始录制
+    await page.context().tracing.start({ 
+      screenshots: true, 
+      snapshots: true,
+      sources: true 
+    });
+
     const passwordInput = page.locator('input[type="password"]');
     const toggleButton = page.locator('.relative button').first(); // 密码输入框右侧的切换按钮
 
@@ -65,6 +72,9 @@ test.describe('LoginPage 单元测试', () => {
 
     // 应该切换回密码类型
     await expect(passwordInput).toHaveAttribute('type', 'password');
+
+    // 停止并保存
+    await page.context().tracing.stop({ path: 'trace.zip' });
   });
 
   test('表单验证应该阻止空字段提交', async ({ page }) => {
